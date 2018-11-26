@@ -1,0 +1,28 @@
+#!/bin/bash
+# Write a UNIX Shell Script that repeats the following steps every minute for an hour or so.
+# Make sure you do this on a weekday between 9:30am and 4pm EST while the NASDAQ Stock Exchange is open.
+# 1.Set a shell variable to the current date & time using the format: yyyy-mm-dd-hh-mm-ss.html.
+# 2.Use curl or wget to download the 100 Nasdaq Most Active Stocks Web page and rename it to the string you 
+#   have obtained in the previous step.
+# 3.Use TagSoup, or any similar tool, to generate a .xhtml that corresponds to the downloaded .html file.
+#   TagSoup is written in Java. As such, you have to have a Java JRE installed on your system in order to
+#   run it. The command to run TagSoup is: java -jar tagsoup-1.2.1.jar --files yyyy-mm-dd-hh-mm-ss.html
+#   Use curl or wget to download the tagsoup-1.2.1.jar file if it isn't present in the current directory.
+# 4.Run a Python script that uses the xml.dom.minidom module to traverse the .xhtml document and extract
+#   the relevant values.
+# 5.Store the extracted values in a .csv file as comma-separated values based on the Sample Input/Output 
+#   given below.
+ITERATIONS="0"
+while [ $ITERATIONS -lt 60 ]
+do
+    #Create a variable that represents the filename
+    FILENAME=`date '+%Y-%m-%d-%H-%M-%S'`	
+    #Download a webpage and rename it
+    wget -c http://wsj.com/mdc/public/page/2_3021-activnnm-actives.html -O $FILENAME.html   
+    #Using TagSoup to generate .xhtml file
+    java -jar tagsoup-1.2.1.jar --files $FILENAME.html	
+    #Scrape information from the XHTML file
+    python scrape.py $FILENAME.xhtml >> record.csv
+    ITERATIONS=$[$ITERATIONS+1]
+    sleep 60
+done
